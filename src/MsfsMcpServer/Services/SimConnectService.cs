@@ -114,6 +114,54 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
                     0,
                     0);
             }
+            else if (typeof(T) == typeof(FlightInstrumentsData))
+            {
+                simConnect.RequestDataOnSimObject(
+                    (RequestId)requestId,
+                    DataDefinition.FlightInstruments,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER,
+                    SIMCONNECT_PERIOD.ONCE,
+                    SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT,
+                    0,
+                    0,
+                    0);
+            }
+            else if (typeof(T) == typeof(EngineStatusData))
+            {
+                simConnect.RequestDataOnSimObject(
+                    (RequestId)requestId,
+                    DataDefinition.EngineStatus,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER,
+                    SIMCONNECT_PERIOD.ONCE,
+                    SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT,
+                    0,
+                    0,
+                    0);
+            }
+            else if (typeof(T) == typeof(AutopilotStatusData))
+            {
+                simConnect.RequestDataOnSimObject(
+                    (RequestId)requestId,
+                    DataDefinition.AutopilotStatus,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER,
+                    SIMCONNECT_PERIOD.ONCE,
+                    SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT,
+                    0,
+                    0,
+                    0);
+            }
+            else if (typeof(T) == typeof(AircraftInfoData))
+            {
+                simConnect.RequestDataOnSimObject(
+                    (RequestId)requestId,
+                    DataDefinition.AircraftInfo,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER,
+                    SIMCONNECT_PERIOD.ONCE,
+                    SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT,
+                    0,
+                    0,
+                    0);
+            }
             else
             {
                 throw new NotSupportedException($"Unsupported data request type: {typeof(T).Name}");
@@ -158,6 +206,47 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
         simConnect.AddToDataDefinition(DataDefinition.FlightPosition, "PLANE PITCH DEGREES", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
         simConnect.AddToDataDefinition(DataDefinition.FlightPosition, "PLANE BANK DEGREES", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
         simConnect.RegisterDataDefineStruct<FlightPositionData>(DataDefinition.FlightPosition);
+
+        simConnect.AddToDataDefinition(DataDefinition.FlightInstruments, "INDICATED ALTITUDE", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightInstruments, "AIRSPEED INDICATED", "Knots", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightInstruments, "AIRSPEED TRUE", "Knots", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightInstruments, "AIRSPEED MACH", "Mach", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightInstruments, "HEADING INDICATOR", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightInstruments, "KOHLSMAN SETTING HG", "inHg", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightInstruments, "ATTITUDE INDICATOR PITCH DEGREES", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightInstruments, "ATTITUDE INDICATOR BANK DEGREES", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.RegisterDataDefineStruct<FlightInstrumentsData>(DataDefinition.FlightInstruments);
+
+        simConnect.AddToDataDefinition(DataDefinition.EngineStatus, "NUMBER OF ENGINES", "Number", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.EngineStatus, "GENERAL ENG RPM:1", "Rpm", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.EngineStatus, "GENERAL ENG THROTTLE LEVER POSITION:1", "Percent", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.EngineStatus, "ENG FUEL FLOW GPH:1", "Gallons per hour", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.EngineStatus, "FUEL TOTAL QUANTITY", "Gallons", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.EngineStatus, "ENG EXHAUST GAS TEMPERATURE:1", "Celsius", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.EngineStatus, "ENG OIL PRESSURE:1", "Psi", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.EngineStatus, "ENG OIL TEMPERATURE:1", "Celsius", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.RegisterDataDefineStruct<EngineStatusData>(DataDefinition.EngineStatus);
+
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT MASTER", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT HEADING LOCK", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT HEADING LOCK DIR", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT ALTITUDE LOCK", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT ALTITUDE LOCK VAR", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT AIRSPEED HOLD", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT AIRSPEED HOLD VAR", "Knots", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT VERTICAL HOLD", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT VERTICAL HOLD VAR", "Feet per minute", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT NAV1 LOCK", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AutopilotStatus, "AUTOPILOT APPROACH HOLD", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.RegisterDataDefineStruct<AutopilotStatusData>(DataDefinition.AutopilotStatus);
+
+        simConnect.AddToDataDefinition(DataDefinition.AircraftInfo, "TITLE", null, SIMCONNECT_DATATYPE.STRING256, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AircraftInfo, "ATC ID", null, SIMCONNECT_DATATYPE.STRING64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AircraftInfo, "ATC AIRLINE", null, SIMCONNECT_DATATYPE.STRING64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AircraftInfo, "TOTAL WEIGHT", "Pounds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AircraftInfo, "MAX GROSS WEIGHT", "Pounds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.AircraftInfo, "EMPTY WEIGHT", "Pounds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.RegisterDataDefineStruct<AircraftInfoData>(DataDefinition.AircraftInfo);
     }
 
     private void OnRecvOpen(SimConnect sender, SIMCONNECT_RECV_OPEN data)
@@ -286,7 +375,11 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
 
     private enum DataDefinition
     {
-        FlightPosition = 1
+        FlightPosition = 1,
+        FlightInstruments = 2,
+        EngineStatus = 3,
+        AutopilotStatus = 4,
+        AircraftInfo = 5
     }
 
     private enum RequestId : uint
