@@ -31,7 +31,8 @@ public class AutopilotStatusToolTests
                 ApproachHold = 0
             });
 
-        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance, callLogger.Object);
 
         var result = await tool.GetAutopilotStatus(CancellationToken.None);
 
@@ -48,6 +49,7 @@ public class AutopilotStatusToolTests
         result.NavMode.Should().BeTrue();
         result.ApproachMode.Should().BeFalse();
         DateTimeOffset.Parse(result.Timestamp).Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(2));
+        callLogger.Verify(l => l.LogSuccess("get_autopilot_status", It.IsAny<TimeSpan>()), Times.Once);
     }
 
     [Fact]
@@ -55,11 +57,13 @@ public class AutopilotStatusToolTests
     {
         var simConnect = new Mock<ISimConnectService>();
         simConnect.Setup(s => s.IsConnected).Returns(false);
-        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance, callLogger.Object);
 
         var result = await tool.GetAutopilotStatus(CancellationToken.None);
 
         result.Error.Should().Be("SimConnect not available. Is MSFS running?");
+        callLogger.Verify(l => l.LogFailure("get_autopilot_status", It.IsAny<TimeSpan>(), "SimConnect not available. Is MSFS running?"), Times.Once);
     }
 
     [Fact]
@@ -71,11 +75,13 @@ public class AutopilotStatusToolTests
             .Setup(s => s.RequestDataAsync<AutopilotStatusData>(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new TimeoutException());
 
-        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance, callLogger.Object);
 
         var result = await tool.GetAutopilotStatus(CancellationToken.None);
 
         result.Error.Should().Be("Request timed out. MSFS may be loading or on main menu.");
+        callLogger.Verify(l => l.LogFailure("get_autopilot_status", It.IsAny<TimeSpan>(), "Request timed out. MSFS may be loading or on main menu."), Times.Once);
     }
 
     [Fact]
@@ -87,23 +93,27 @@ public class AutopilotStatusToolTests
             .Setup(s => s.RequestDataAsync<AutopilotStatusData>(It.IsAny<CancellationToken>()))
             .ReturnsAsync((AutopilotStatusData?)null);
 
-        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance, callLogger.Object);
 
         var result = await tool.GetAutopilotStatus(CancellationToken.None);
 
         result.Error.Should().Be("Unable to retrieve autopilot data. Ensure you are in an active flight.");
+        callLogger.Verify(l => l.LogFailure("get_autopilot_status", It.IsAny<TimeSpan>(), "Unable to retrieve autopilot data. Ensure you are in an active flight."), Times.Once);
     }
 
     [Fact]
     public async Task GetAutopilotStatus_WhenCanceled_ReturnsCanceledMessage()
     {
         var simConnect = new Mock<ISimConnectService>();
-        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new AutopilotStatusTool(simConnect.Object, NullLogger<AutopilotStatusTool>.Instance, callLogger.Object);
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
         var result = await tool.GetAutopilotStatus(cts.Token);
 
         result.Error.Should().Be("Request canceled.");
+        callLogger.Verify(l => l.LogFailure("get_autopilot_status", It.IsAny<TimeSpan>(), "Request canceled."), Times.Once);
     }
 }

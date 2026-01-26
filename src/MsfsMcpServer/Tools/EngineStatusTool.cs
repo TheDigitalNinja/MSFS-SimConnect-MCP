@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
 using MsfsMcpServer.Models;
@@ -12,17 +13,20 @@ namespace MsfsMcpServer.Tools;
 [McpServerToolType]
 public sealed class EngineStatusTool
 {
+    private const string ToolName = "get_engine_status";
     private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(2);
     private readonly ISimConnectService _simConnect;
     private readonly ILogger<EngineStatusTool> _logger;
+    private readonly IToolCallLogger _callLogger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EngineStatusTool"/> class.
     /// </summary>
-    public EngineStatusTool(ISimConnectService simConnect, ILogger<EngineStatusTool> logger)
+    public EngineStatusTool(ISimConnectService simConnect, ILogger<EngineStatusTool> logger, IToolCallLogger callLogger)
     {
         _simConnect = simConnect;
         _logger = logger;
+        _callLogger = callLogger;
     }
 
     /// <summary>
@@ -31,50 +35,78 @@ public sealed class EngineStatusTool
     [McpServerTool(Name = "get_engine_status"), Description("Gets engine RPM, throttle, fuel, and temperatures.")]
     public async Task<EngineStatusResponse> GetEngineStatus(CancellationToken ct)
     {
-        if (ct.IsCancellationRequested)
-        {
-            _logger.LogWarning("Engine status request was canceled before execution.");
-            return EngineStatusResponse.ErrorResponse("Request canceled.");
-        }
-
-        if (!_simConnect.IsConnected)
-        {
-            return EngineStatusResponse.ErrorResponse("SimConnect not available. Is MSFS running?");
-        }
-
-        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        timeoutCts.CancelAfter(RequestTimeout);
+        var stopwatch = Stopwatch.StartNew();
+        EngineStatusResponse response = EngineStatusResponse.ErrorResponse("An unexpected error occurred.");
 
         try
         {
+            if (ct.IsCancellationRequested)
+            {
+                _logger.LogWarning("Engine status request was canceled before execution.");
+                response = EngineStatusResponse.ErrorResponse("Request canceled.");
+                return response;
+            }
+
+            if (!_simConnect.IsConnected)
+            {
+                response = EngineStatusResponse.ErrorResponse("SimConnect not available. Is MSFS running?");
+                return response;
+            }
+
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            timeoutCts.CancelAfter(RequestTimeout);
+
             var data = await _simConnect.RequestDataAsync<EngineStatusData>(timeoutCts.Token).ConfigureAwait(false);
 
             if (data == null)
             {
-                return EngineStatusResponse.ErrorResponse("Unable to retrieve engine data. Ensure you are in an active flight.");
+                response = EngineStatusResponse.ErrorResponse("Unable to retrieve engine data. Ensure you are in an active flight.");
+                return response;
             }
 
-            return EngineStatusResponse.FromData(data.Value);
+            response = EngineStatusResponse.FromData(data.Value);
+            return response;
         }
         catch (TimeoutException)
         {
             _logger.LogWarning("Timeout requesting engine status.");
-            return EngineStatusResponse.ErrorResponse("Request timed out. MSFS may be loading or on main menu.");
+            response = EngineStatusResponse.ErrorResponse("Request timed out. MSFS may be loading or on main menu.");
+            return response;
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
             _logger.LogWarning("Engine status request canceled.");
-            return EngineStatusResponse.ErrorResponse("Request canceled.");
+            response = EngineStatusResponse.ErrorResponse("Request canceled.");
+            return response;
         }
         catch (OperationCanceledException)
         {
             _logger.LogWarning("Engine status request canceled due to timeout.");
-            return EngineStatusResponse.ErrorResponse("Request timed out. MSFS may be loading or on main menu.");
+            response = EngineStatusResponse.ErrorResponse("Request timed out. MSFS may be loading or on main menu.");
+            return response;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting engine status.");
-            return EngineStatusResponse.ErrorResponse("An unexpected error occurred.");
+            response = EngineStatusResponse.ErrorResponse("An unexpected error occurred.");
+            return response;
+        }
+        finally
+        {
+            stopwatch.Stop();
+            Log(response, stopwatch.Elapsed);
+        }
+
+        void Log(EngineStatusResponse result, TimeSpan elapsed)
+        {
+            if (result.Error is null)
+            {
+                _callLogger.LogSuccess(ToolName, elapsed);
+            }
+            else
+            {
+                _callLogger.LogFailure(ToolName, elapsed, result.Error);
+            }
         }
     }
 }

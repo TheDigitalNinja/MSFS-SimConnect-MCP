@@ -14,7 +14,8 @@ public class ConnectionStatusToolTests
     {
         var simConnect = new Mock<ISimConnectService>();
         simConnect.Setup(s => s.IsConnected).Returns(true);
-        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance, callLogger.Object);
 
         var result = await tool.GetConnectionStatus(CancellationToken.None);
 
@@ -24,6 +25,7 @@ public class ConnectionStatusToolTests
             Simulator = "Microsoft Flight Simulator 2024",
             Error = null
         });
+        callLogger.Verify(l => l.LogSuccess("get_connection_status", It.IsAny<TimeSpan>()), Times.Once);
     }
 
     [Fact]
@@ -31,19 +33,22 @@ public class ConnectionStatusToolTests
     {
         var simConnect = new Mock<ISimConnectService>();
         simConnect.Setup(s => s.IsConnected).Returns(false);
-        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance, callLogger.Object);
 
         var result = await tool.GetConnectionStatus(CancellationToken.None);
 
         result.Connected.Should().BeFalse();
         result.Error.Should().Be("SimConnect not available. Is MSFS running?");
+        callLogger.Verify(l => l.LogFailure("get_connection_status", It.IsAny<TimeSpan>(), "SimConnect not available. Is MSFS running?"), Times.Once);
     }
 
     [Fact]
     public async Task GetConnectionStatus_WhenCanceled_ReturnsCanceledMessage()
     {
         var simConnect = new Mock<ISimConnectService>();
-        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance, callLogger.Object);
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
@@ -51,6 +56,7 @@ public class ConnectionStatusToolTests
 
         result.Connected.Should().BeFalse();
         result.Error.Should().Be("Request canceled.");
+        callLogger.Verify(l => l.LogFailure("get_connection_status", It.IsAny<TimeSpan>(), "Request canceled."), Times.Once);
     }
 
     [Fact]
@@ -58,11 +64,13 @@ public class ConnectionStatusToolTests
     {
         var simConnect = new Mock<ISimConnectService>();
         simConnect.Setup(s => s.IsConnected).Throws(new InvalidOperationException("boom"));
-        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance, callLogger.Object);
 
         var result = await tool.GetConnectionStatus(CancellationToken.None);
 
         result.Connected.Should().BeFalse();
         result.Error.Should().Be("An unexpected error occurred.");
+        callLogger.Verify(l => l.LogFailure("get_connection_status", It.IsAny<TimeSpan>(), "An unexpected error occurred."), Times.Once);
     }
 }

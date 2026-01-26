@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSFS MCP Dashboard</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --table-border: rgba(255, 255, 255, 0.15);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            padding: 24px;
+            background: #0f172a;
+            color: #e5e7eb;
+        }
+
+        h1 { margin: 0 0 8px; }
+        h2 { margin: 0 0 12px; font-size: 16px; letter-spacing: 0.2px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            backdrop-filter: blur(6px);
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0 16px;
+        }
+
+        .indicator {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--danger);
+            box-shadow: 0 0 12px rgba(0,0,0,0.3);
+        }
+
+        .indicator.online {
+            background: var(--success);
+            box-shadow: 0 0 12px rgba(46, 204, 113, 0.7);
+        }
+
+        .muted { color: var(--text-muted); }
+
+        .kvs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 10px;
+            font-size: 14px;
+        }
+
+        .kvs span { display: block; }
+        .kvs .label { color: var(--text-muted); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--table-border);
+            text-align: left;
+        }
+
+        th { color: var(--text-muted); font-weight: 600; }
+
+        .log-success { color: var(--success); }
+        .log-failure { color: var(--danger); }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .error-text { color: var(--danger); }
+
+        .layout-two {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MSFS MCP Dashboard</h1>
+        <div class="muted">Live status and recent MCP tool calls</div>
+    </header>
+
+    <section class="grid" style="margin-top: 16px;">
+        <div class="card">
+            <h2>Connection</h2>
+            <div class="status-row">
+                <div id="status-indicator" class="indicator"></div>
+                <div>
+                    <div id="status-text">Offline</div>
+                    <div id="status-error" class="muted"></div>
+                </div>
+            </div>
+            <div class="kvs">
+                <span class="label">Simulator</span><span id="status-sim">—</span>
+                <span class="label">Last Checked</span><span id="status-timestamp">—</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Aircraft</h2>
+            <div class="kvs">
+                <span class="label">Title</span><span id="ac-title">—</span>
+                <span class="label">Tail #</span><span id="ac-tail">—</span>
+                <span class="label">Airline</span><span id="ac-airline">—</span>
+                <span class="label">Weight (lbs)</span><span id="ac-weight">—</span>
+            </div>
+            <div class="muted" id="ac-error"></div>
+        </div>
+
+        <div class="card">
+            <h2>Position</h2>
+            <div class="kvs">
+                <span class="label">Latitude</span><span id="pos-lat">—</span>
+                <span class="label">Longitude</span><span id="pos-lon">—</span>
+                <span class="label">Altitude (ft)</span><span id="pos-alt">—</span>
+                <span class="label">Heading (°)</span><span id="pos-hdg">—</span>
+                <span class="label">Ground Speed (kts)</span><span id="pos-gs">—</span>
+                <span class="label">Vertical Speed (fpm)</span><span id="pos-vs">—</span>
+                <span class="label">Pitch (°)</span><span id="pos-pitch">—</span>
+                <span class="label">Bank (°)</span><span id="pos-bank">—</span>
+                <span class="label">Timestamp</span><span id="pos-ts">—</span>
+            </div>
+            <div class="muted" id="pos-error"></div>
+        </div>
+
+        <div class="card">
+            <h2>Instruments</h2>
+            <div class="kvs">
+                <span class="label">Indicated Alt (ft)</span><span id="inst-alt">—</span>
+                <span class="label">IAS (kts)</span><span id="inst-ias">—</span>
+                <span class="label">TAS (kts)</span><span id="inst-tas">—</span>
+                <span class="label">Mach</span><span id="inst-mach">—</span>
+                <span class="label">Heading (°)</span><span id="inst-hdg">—</span>
+                <span class="label">Altimeter (inHg)</span><span id="inst-altim">—</span>
+                <span class="label">Pitch (°)</span><span id="inst-pitch">—</span>
+                <span class="label">Bank (°)</span><span id="inst-bank">—</span>
+                <span class="label">Timestamp</span><span id="inst-ts">—</span>
+            </div>
+            <div class="muted" id="inst-error"></div>
+        </div>
+
+        <div class="card">
+            <h2>Autopilot</h2>
+            <div class="kvs">
+                <span class="label">Master</span><span id="ap-master">—</span>
+                <span class="label">Heading Mode</span><span id="ap-hdg-mode">—</span>
+                <span class="label">Heading Select (°)</span><span id="ap-hdg">—</span>
+                <span class="label">Altitude Hold</span><span id="ap-alt-mode">—</span>
+                <span class="label">Altitude Select (ft)</span><span id="ap-alt">—</span>
+                <span class="label">Speed Hold</span><span id="ap-speed-mode">—</span>
+                <span class="label">Speed Select (kts)</span><span id="ap-speed">—</span>
+                <span class="label">Vertical Speed Mode</span><span id="ap-vs-mode">—</span>
+                <span class="label">Vertical Speed (fpm)</span><span id="ap-vs">—</span>
+                <span class="label">NAV Mode</span><span id="ap-nav">—</span>
+                <span class="label">Approach Mode</span><span id="ap-app">—</span>
+                <span class="label">Timestamp</span><span id="ap-ts">—</span>
+            </div>
+            <div class="muted" id="ap-error"></div>
+        </div>
+
+        <div class="card">
+            <h2>Engine</h2>
+            <div class="kvs">
+                <span class="label">Engines</span><span id="eng-count">—</span>
+                <span class="label">RPM</span><span id="eng-rpm">—</span>
+                <span class="label">Throttle (%)</span><span id="eng-throttle">—</span>
+                <span class="label">Fuel Flow (GPH)</span><span id="eng-flow">—</span>
+                <span class="label">Fuel Total (gal)</span><span id="eng-total">—</span>
+                <span class="label">EGT (°C)</span><span id="eng-egt">—</span>
+                <span class="label">Oil Pressure (psi)</span><span id="eng-oil-press">—</span>
+                <span class="label">Oil Temp (°C)</span><span id="eng-oil-temp">—</span>
+                <span class="label">Timestamp</span><span id="eng-ts">—</span>
+            </div>
+            <div class="muted" id="eng-error"></div>
+        </div>
+    </section>
+
+    <section class="card" style="margin-top: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h2 style="margin: 0;">Recent MCP Tool Calls</h2>
+            <span class="badge" id="log-count">0 calls</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Outcome</th>
+                    <th>Duration (ms)</th>
+                    <th>Timestamp (UTC)</th>
+                    <th>Error</th>
+                </tr>
+            </thead>
+            <tbody id="log-body">
+                <tr><td colspan="5" class="muted">No calls yet.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <script>
+        const formatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 });
+
+        async function fetchJson(path) {
+            try {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                return { error: error.message || "Request failed" };
+            }
+        }
+
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value ?? "—";
+            }
+        }
+
+        function setError(id, error) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = error ?? "";
+                el.className = error ? "error-text" : "muted";
+            }
+        }
+
+        function formatBool(value) {
+            if (value === true) return "On";
+            if (value === false) return "Off";
+            return "—";
+        }
+
+        async function refresh() {
+            const status = await fetchJson("/api/status");
+            const indicator = document.getElementById("status-indicator");
+            const online = status && status.connected === true;
+            if (indicator) {
+                indicator.classList.toggle("online", online);
+            }
+            setText("status-text", online ? "Connected" : "Offline");
+            setText("status-sim", status?.simulator || "—");
+            setText("status-timestamp", new Date().toLocaleTimeString());
+            setError("status-error", status?.error);
+
+            if (!online) {
+                clearFlightData();
+            } else {
+                const [aircraft, position, instruments, autopilot, engine] = await Promise.all([
+                    fetchJson("/api/aircraft"),
+                    fetchJson("/api/position"),
+                    fetchJson("/api/instruments"),
+                    fetchJson("/api/autopilot"),
+                    fetchJson("/api/engine")
+                ]);
+                updateAircraft(aircraft);
+                updatePosition(position);
+                updateInstruments(instruments);
+                updateAutopilot(autopilot);
+                updateEngine(engine);
+            }
+
+            const logs = await fetchJson("/api/logs");
+            updateLogs(Array.isArray(logs) ? logs : []);
+        }
+
+        function clearFlightData() {
+            ["ac-title","ac-tail","ac-airline","ac-weight",
+             "pos-lat","pos-lon","pos-alt","pos-hdg","pos-gs","pos-vs","pos-pitch","pos-bank","pos-ts",
+             "inst-alt","inst-ias","inst-tas","inst-mach","inst-hdg","inst-altim","inst-pitch","inst-bank","inst-ts",
+             "ap-master","ap-hdg-mode","ap-hdg","ap-alt-mode","ap-alt","ap-speed-mode","ap-speed","ap-vs-mode","ap-vs","ap-nav","ap-app","ap-ts",
+             "eng-count","eng-rpm","eng-throttle","eng-flow","eng-total","eng-egt","eng-oil-press","eng-oil-temp","eng-ts"
+            ].forEach(id => setText(id, "—"));
+
+            ["ac-error","pos-error","inst-error","ap-error","eng-error"].forEach(id => setError(id, ""));
+        }
+
+        function updateAircraft(data) {
+            setText("ac-title", data?.aircraft_title ?? "—");
+            setText("ac-tail", data?.tail_number ?? "—");
+            setText("ac-airline", data?.airline ?? "—");
+            setText("ac-weight", data?.total_weight_lbs != null ? formatter.format(data.total_weight_lbs) : "—");
+            setError("ac-error", data?.error);
+        }
+
+        function updatePosition(data) {
+            setText("pos-lat", data?.latitude ?? "—");
+            setText("pos-lon", data?.longitude ?? "—");
+            setText("pos-alt", data?.altitude_msl_ft ?? "—");
+            setText("pos-hdg", data?.heading_true ?? "—");
+            setText("pos-gs", data?.ground_speed_kts ?? "—");
+            setText("pos-vs", data?.vertical_speed_fpm ?? "—");
+            setText("pos-pitch", data?.pitch_deg ?? "—");
+            setText("pos-bank", data?.bank_deg ?? "—");
+            setText("pos-ts", data?.timestamp ?? "—");
+            setError("pos-error", data?.error);
+        }
+
+        function updateInstruments(data) {
+            setText("inst-alt", data?.indicated_altitude_ft ?? "—");
+            setText("inst-ias", data?.airspeed_indicated_kts ?? "—");
+            setText("inst-tas", data?.airspeed_true_kts ?? "—");
+            setText("inst-mach", data?.mach ?? "—");
+            setText("inst-hdg", data?.heading_indicator_deg ?? "—");
+            setText("inst-altim", data?.altimeter_setting_inhg ?? "—");
+            setText("inst-pitch", data?.attitude_pitch_deg ?? "—");
+            setText("inst-bank", data?.attitude_bank_deg ?? "—");
+            setText("inst-ts", data?.timestamp ?? "—");
+            setError("inst-error", data?.error);
+        }
+
+        function updateAutopilot(data) {
+            setText("ap-master", formatBool(data?.autopilot_master));
+            setText("ap-hdg-mode", formatBool(data?.heading_mode));
+            setText("ap-hdg", data?.heading_select_deg ?? "—");
+            setText("ap-alt-mode", formatBool(data?.altitude_hold_mode));
+            setText("ap-alt", data?.altitude_select_ft ?? "—");
+            setText("ap-speed-mode", formatBool(data?.speed_hold_mode));
+            setText("ap-speed", data?.speed_select_kts ?? "—");
+            setText("ap-vs-mode", formatBool(data?.vertical_speed_mode));
+            setText("ap-vs", data?.vertical_speed_fpm ?? "—");
+            setText("ap-nav", formatBool(data?.nav_mode));
+            setText("ap-app", formatBool(data?.approach_mode));
+            setText("ap-ts", data?.timestamp ?? "—");
+            setError("ap-error", data?.error);
+        }
+
+        function updateEngine(data) {
+            setText("eng-count", data?.engine_count ?? "—");
+            setText("eng-rpm", data?.engine1_rpm ?? "—");
+            setText("eng-throttle", data?.engine1_throttle_pct ?? "—");
+            setText("eng-flow", data?.fuel_flow_gph ?? "—");
+            setText("eng-total", data?.fuel_total_gal ?? "—");
+            setText("eng-egt", data?.egt_celsius ?? "—");
+            setText("eng-oil-press", data?.oil_pressure_psi ?? "—");
+            setText("eng-oil-temp", data?.oil_temp_celsius ?? "—");
+            setText("eng-ts", data?.timestamp ?? "—");
+            setError("eng-error", data?.error);
+        }
+
+        function updateLogs(entries) {
+            const body = document.getElementById("log-body");
+            const countBadge = document.getElementById("log-count");
+            if (!body) return;
+
+            if (!entries || entries.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="muted">No calls yet.</td></tr>`;
+                if (countBadge) countBadge.textContent = "0 calls";
+                return;
+            }
+
+            body.innerHTML = entries.map(e => `
+                <tr>
+                    <td>${e.tool ?? "—"}</td>
+                    <td class="${e.success ? "log-success" : "log-failure"}">${e.success ? "Success" : "Failure"}</td>
+                    <td>${e.duration_ms ?? "—"}</td>
+                    <td>${e.timestamp ?? "—"}</td>
+                    <td>${e.error ?? ""}</td>
+                </tr>
+            `).join("");
+
+            if (countBadge) {
+                countBadge.textContent = `${entries.length} call${entries.length === 1 ? "" : "s"}`;
+            }
+        }
+
+        refresh();
+        setInterval(refresh, 2000);
+    </script>
+</body>
+</html>

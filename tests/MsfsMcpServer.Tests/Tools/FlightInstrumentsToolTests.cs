@@ -28,7 +28,8 @@ public class FlightInstrumentsToolTests
                 AttitudeBankDegrees = -3.26
             });
 
-        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance, callLogger.Object);
 
         var result = await tool.GetFlightInstruments(CancellationToken.None);
 
@@ -42,6 +43,7 @@ public class FlightInstrumentsToolTests
         result.AttitudePitchDegrees.Should().Be(2.4);
         result.AttitudeBankDegrees.Should().Be(-3.3);
         DateTimeOffset.Parse(result.Timestamp).Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(2));
+        callLogger.Verify(l => l.LogSuccess("get_flight_instruments", It.IsAny<TimeSpan>()), Times.Once);
     }
 
     [Fact]
@@ -49,11 +51,13 @@ public class FlightInstrumentsToolTests
     {
         var simConnect = new Mock<ISimConnectService>();
         simConnect.Setup(s => s.IsConnected).Returns(false);
-        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance, callLogger.Object);
 
         var result = await tool.GetFlightInstruments(CancellationToken.None);
 
         result.Error.Should().Be("SimConnect not available. Is MSFS running?");
+        callLogger.Verify(l => l.LogFailure("get_flight_instruments", It.IsAny<TimeSpan>(), "SimConnect not available. Is MSFS running?"), Times.Once);
     }
 
     [Fact]
@@ -65,11 +69,13 @@ public class FlightInstrumentsToolTests
             .Setup(s => s.RequestDataAsync<FlightInstrumentsData>(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new TimeoutException());
 
-        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance, callLogger.Object);
 
         var result = await tool.GetFlightInstruments(CancellationToken.None);
 
         result.Error.Should().Be("Request timed out. MSFS may be loading or on main menu.");
+        callLogger.Verify(l => l.LogFailure("get_flight_instruments", It.IsAny<TimeSpan>(), "Request timed out. MSFS may be loading or on main menu."), Times.Once);
     }
 
     [Fact]
@@ -81,23 +87,27 @@ public class FlightInstrumentsToolTests
             .Setup(s => s.RequestDataAsync<FlightInstrumentsData>(It.IsAny<CancellationToken>()))
             .ReturnsAsync((FlightInstrumentsData?)null);
 
-        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance, callLogger.Object);
 
         var result = await tool.GetFlightInstruments(CancellationToken.None);
 
         result.Error.Should().Be("Unable to retrieve flight data. Ensure you are in an active flight.");
+        callLogger.Verify(l => l.LogFailure("get_flight_instruments", It.IsAny<TimeSpan>(), "Unable to retrieve flight data. Ensure you are in an active flight."), Times.Once);
     }
 
     [Fact]
     public async Task GetFlightInstruments_WhenCanceled_ReturnsCanceledMessage()
     {
         var simConnect = new Mock<ISimConnectService>();
-        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new FlightInstrumentsTool(simConnect.Object, NullLogger<FlightInstrumentsTool>.Instance, callLogger.Object);
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
         var result = await tool.GetFlightInstruments(cts.Token);
 
         result.Error.Should().Be("Request canceled.");
+        callLogger.Verify(l => l.LogFailure("get_flight_instruments", It.IsAny<TimeSpan>(), "Request canceled."), Times.Once);
     }
 }

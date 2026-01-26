@@ -18,6 +18,7 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
     private readonly SimConnectMessageWindow _messageWindow;
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
     private readonly ConcurrentDictionary<uint, PendingRequest> _pendingRequests = new();
+    private readonly SemaphoreSlim _requestLock = new(1, 1);
 
     private SimConnect? _simConnect;
     private int _requestId;
@@ -73,6 +74,7 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
 
     public async Task<T?> RequestDataAsync<T>(CancellationToken ct = default) where T : struct
     {
+        await _requestLock.WaitAsync(ct).ConfigureAwait(false);
         var simConnect = _simConnect ?? throw new InvalidOperationException("Not connected to SimConnect.");
 
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -181,6 +183,7 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
         }
         finally
         {
+            _requestLock.Release();
             _pendingRequests.TryRemove(requestId, out var _);
             registration.Dispose();
         }
@@ -390,6 +393,7 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
 
     private async Task<int?> RequestSystemStateAsync(string stateName, CancellationToken ct)
     {
+        await _requestLock.WaitAsync(ct).ConfigureAwait(false);
         var simConnect = _simConnect ?? throw new InvalidOperationException("Not connected to SimConnect.");
 
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -434,6 +438,7 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
         }
         finally
         {
+            _requestLock.Release();
             _pendingRequests.TryRemove(requestId, out var _);
             registration.Dispose();
         }
