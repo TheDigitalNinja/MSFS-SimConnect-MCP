@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <Target Name="CopySimConnectDll" AfterTargets="Build" Condition="'$(MSFS2024_SDK)' != '' And Exists('$(SimConnectNativePath)')">
-    <Copy SourceFiles="$(SimConnectNativePath)" DestinationFolder="$(OutputPath)" />
+    <Copy SourceFiles="$(SimConnectNativePath)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
     <Message Text="Copied SimConnect.dll to $(OutputPath)" Importance="high" />
   </Target>
 

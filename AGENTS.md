@@ -196,7 +196,7 @@ var tool = new FlightPositionTool(mock.Object, NullLogger<FlightPositionTool>.In
 ## Command Discipline
 
 - Never run `cd`; the working directory is already set correctly.
-- Always verify changes with `dotnet build` and `dotnet test` before declaring work complete.
+- **Build/test are mandatory:** Run `dotnet build` and `dotnet test` after changes and before declaring work complete. This is not optional; report failures immediately with logs.
 
 ## Reference Docs
 

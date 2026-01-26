@@ -33,7 +33,7 @@ TODO
 
 ## Configuration
 
-### Claude Desktop
+### Claude Desktop (MCP)
 
 Add to your Claude Desktop config (`%APPDATA%\Claude\claude_desktop_config.json`):
 
@@ -41,7 +41,7 @@ Add to your Claude Desktop config (`%APPDATA%\Claude\claude_desktop_config.json`
 {
   "mcpServers": {
     "msfs": {
-      "url": "http://localhost:5000/mcp"
+      "url": "http://localhost:5000/mcp/sse"
     }
   }
 }
@@ -49,7 +49,14 @@ Add to your Claude Desktop config (`%APPDATA%\Claude\claude_desktop_config.json`
 
 ### Other MCP Clients
 
-The server runs on `http://localhost:5000` with SSE transport. Connect any MCP-compatible client to this endpoint.
+The server runs on `http://localhost:5000` with SSE transport. Use the SSE endpoint: `http://localhost:5000/mcp/sse`. (Some clients may also accept `http://localhost:5000/mcp`.)
+
+### Quick Start
+
+1. Ensure MSFS is running (ideally in-flight for real data).
+2. Start the server: `dotnet run --project src/MsfsMcpServer`
+3. Connect your MCP client to `http://localhost:5000/mcp/sse`.
+4. Call `get_connection_status` and `get_flight_position`.
 
 ## Usage
 
