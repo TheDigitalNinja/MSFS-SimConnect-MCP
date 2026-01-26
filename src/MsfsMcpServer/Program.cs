@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Windows.Forms;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,14 +8,15 @@ using Microsoft.Extensions.Logging;
 using ModelContextProtocol.AspNetCore;
 using MsfsMcpServer.Services;
 using MsfsMcpServer.UI;
-using System.Windows.Forms;
 
 ApplicationConfiguration.Initialize();
+
+const string ServerUrl = "http://localhost:5000";
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddConsole();
-builder.WebHost.UseUrls("http://localhost:5000");
+builder.WebHost.UseUrls(ServerUrl);
 
 builder.Services.AddCors(options =>
 {
@@ -44,19 +47,58 @@ var app = builder.Build();
 app.UseCors("LocalhostCors");
 app.MapMcp(pattern: "/mcp");
 
-var webHostTask = app.RunAsync();
+using var shutdownCts = new CancellationTokenSource();
+var webHostTask = app.RunAsync(shutdownCts.Token);
 
-var simConnect = app.Services.GetRequiredService<ISimConnectService>();
-var programLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Program");
+var serviceProvider = app.Services;
+var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+var programLogger = loggerFactory.CreateLogger("Program");
+var simConnect = serviceProvider.GetRequiredService<ISimConnectService>();
+
 var connected = await simConnect.ConnectAsync();
 if (!connected)
 {
     programLogger.LogWarning("SimConnect connection could not be established. Ensure MSFS is running with the SDK installed.");
 }
 
-Application.Run(new ApplicationContext());
+var shutdownOnce = 0;
+async Task ShutdownAsync()
+{
+    if (Interlocked.Exchange(ref shutdownOnce, 1) == 1)
+    {
+        return;
+    }
 
-simConnect.Disconnect();
-await app.StopAsync();
-await webHostTask;
+    try
+    {
+        simConnect.Disconnect();
+        shutdownCts.Cancel();
+        await app.StopAsync().ConfigureAwait(false);
+    }
+    catch (Exception ex)
+    {
+        programLogger.LogError(ex, "Error during shutdown.");
+    }
+}
+
+using (var trayContext = new TrayApplicationContext(
+           simConnect,
+           loggerFactory.CreateLogger<TrayApplicationContext>(),
+           new Uri(ServerUrl),
+           ShutdownAsync))
+{
+    Application.Run(trayContext);
+}
+
+await ShutdownAsync();
+
+try
+{
+    await webHostTask.ConfigureAwait(false);
+}
+catch (OperationCanceledException)
+{
+    // Expected when shutting down.
+}
+
 await app.DisposeAsync();
