@@ -166,6 +166,38 @@ mock.Setup(x => x.RequestDataAsync<FlightPositionData>(It.IsAny<CancellationToke
 var tool = new FlightPositionTool(mock.Object, NullLogger<FlightPositionTool>.Instance);
 ```
 
+## Tool Implementation Guide
+
+- Create a response model in `src/MsfsMcpServer/Models/` with snake_case JSON names and XML docs.
+- Add raw data struct (if needed) with `[StructLayout(LayoutKind.Sequential, Pack = 1)]`.
+- Create the tool class in `src/MsfsMcpServer/Tools/` with `[McpServerToolType]` and `[McpServerTool(Name = "...")]`.
+- Inject `ISimConnectService` and `ILogger<T>` via constructor.
+- Enforce a 2s timeout using a linked `CancellationTokenSource`.
+- Handle cancellation early: return an error response, do not throw.
+- Check `_simConnect.IsConnected` before requesting data.
+- Fetch fresh data with `_simConnect.RequestDataAsync<T>` per call (no caching).
+- Map/round data in the response factory (`Response.FromData`).
+- On errors: log technical details, return friendly messages.
+
+**Error-handling checklist**
+- Disconnected: return `"...Is MSFS running?"`.
+- Timeout: `Request timed out. MSFS may be loading or on main menu.`
+- Null/malformed data: `Unable to retrieve ... Ensure you are in an active flight.`
+- Cancellation: `Request canceled.`
+- Unexpected exception: `An unexpected error occurred.` (log the exception).
+
+**Testing checklist**
+- Place tests in `tests/MsfsMcpServer.Tests/Tools/`.
+- Use `Moq` to fake `ISimConnectService`; `FluentAssertions` for assertions.
+- Cover: success (with rounding), disconnected, timeout, null data, cancellation, unexpected exception.
+- Validate timestamp is present and reasonable for success responses.
+- Keep tests CI-friendly (no MSFS dependency); use mock data only.
+
+## Command Discipline
+
+- Never run `cd`; the working directory is already set correctly.
+- Always verify changes with `dotnet build` and `dotnet test` before declaring work complete.
+
 ## Reference Docs
 
 - **Full project spec**: See `PROJECT_SPEC.md` in this repo
