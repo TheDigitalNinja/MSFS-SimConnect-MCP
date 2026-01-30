@@ -104,6 +104,10 @@ TODO - screenshot
 
 This project is released under the [Unlicense](LICENSE) - public domain.
 
+## Contributing
+
+Instead of pull requests, please send a prompt describing what you want the tools or server to do, which SimVars/behaviors matter, and the expected outputs. I’ll run the prompt myself so changes reflect real usage intent.
+
 ## Links
 
 - [SimConnect SDK Documentation](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/SimConnect_SDK.htm)
