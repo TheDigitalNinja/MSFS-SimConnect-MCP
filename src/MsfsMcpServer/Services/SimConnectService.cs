@@ -164,6 +164,54 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
                     0,
                     0);
             }
+            else if (typeof(T) == typeof(FlightPlanLegData))
+            {
+                simConnect.RequestDataOnSimObject(
+                    (RequestId)requestId,
+                    DataDefinition.FlightPlanLeg,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER,
+                    SIMCONNECT_PERIOD.ONCE,
+                    SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT,
+                    0,
+                    0,
+                    0);
+            }
+            else if (typeof(T) == typeof(FlightPlanWaypointData))
+            {
+                simConnect.RequestDataOnSimObject(
+                    (RequestId)requestId,
+                    DataDefinition.FlightPlanWaypoint,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER,
+                    SIMCONNECT_PERIOD.ONCE,
+                    SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT,
+                    0,
+                    0,
+                    0);
+            }
+            else if (typeof(T) == typeof(NavigationStatusData))
+            {
+                simConnect.RequestDataOnSimObject(
+                    (RequestId)requestId,
+                    DataDefinition.NavigationStatus,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER,
+                    SIMCONNECT_PERIOD.ONCE,
+                    SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT,
+                    0,
+                    0,
+                    0);
+            }
+            else if (typeof(T) == typeof(ApproachStatusData))
+            {
+                simConnect.RequestDataOnSimObject(
+                    (RequestId)requestId,
+                    DataDefinition.ApproachStatus,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER,
+                    SIMCONNECT_PERIOD.ONCE,
+                    SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT,
+                    0,
+                    0,
+                    0);
+            }
             else
             {
                 throw new NotSupportedException($"Unsupported data request type: {typeof(T).Name}");
@@ -250,6 +298,61 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
         simConnect.AddToDataDefinition(DataDefinition.AircraftInfo, "MAX GROSS WEIGHT", "Pounds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
         simConnect.AddToDataDefinition(DataDefinition.AircraftInfo, "EMPTY WEIGHT", "Pounds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
         simConnect.RegisterDataDefineStruct<AircraftInfoData>(DataDefinition.AircraftInfo);
+
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS IS ACTIVE FLIGHT PLAN", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS FLIGHT PLAN WP COUNT", "Number", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS FLIGHT PLAN WP INDEX", "Number", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP NEXT ID", null, SIMCONNECT_DATATYPE.STRING64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP NEXT LAT", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP NEXT LON", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP NEXT ALT", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP NEXT BEARING", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP DESIRED TRACK", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP DISTANCE", "Nautical miles", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP ETE", "Seconds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP ETA", "Seconds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS WP CROSS TRK", "Nautical miles", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS TARGET DISTANCE", "Nautical miles", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS ETE", "Seconds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanLeg, "GPS ETA", "Seconds", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.RegisterDataDefineStruct<FlightPlanLegData>(DataDefinition.FlightPlanLeg);
+
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS FLIGHT PLAN WP INDEX", "Number", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP NEXT ID", null, SIMCONNECT_DATATYPE.STRING64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP NEXT LAT", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP NEXT LON", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP NEXT ALT", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP NEXT TRUE BEARING", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP DISTANCE", "Nautical miles", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP PREV ID", null, SIMCONNECT_DATATYPE.STRING64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP PREV LAT", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP PREV LON", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP PREV ALT", "Feet", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP PREV TRUE BEARING", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.FlightPlanWaypoint, "GPS WP PREV DISTANCE", "Nautical miles", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.RegisterDataDefineStruct<FlightPlanWaypointData>(DataDefinition.FlightPlanWaypoint);
+
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "GPS DRIVES NAV1", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "GPS OBS VALUE", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "NAV OBS:1", "Degrees", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "NAV CDI:1", "Number", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "NAV GSI:1", "Number", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "NAV HAS LOCALIZER:1", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "NAV HAS GLIDE SLOPE:1", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "NAV ACTIVE FREQUENCY:1", "MHz", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.NavigationStatus, "NAV ACTIVE FREQUENCY:2", "MHz", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.RegisterDataDefineStruct<NavigationStatusData>(DataDefinition.NavigationStatus);
+
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "GPS IS APPROACH LOADED", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "GPS IS APPROACH ACTIVE", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "GPS APPROACH WP INDEX", "Number", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "GPS APPROACH WP COUNT", "Number", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "GPS APPROACH IS FINAL", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "GPS APPROACH IS MISSED", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "GPS HAS GLIDEPATH", "Bool", SIMCONNECT_DATATYPE.INT32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "NAV GLIDE SLOPE ERROR:1", "Number", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.AddToDataDefinition(DataDefinition.ApproachStatus, "GPS GSI NEEDLE", "Number", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        simConnect.RegisterDataDefineStruct<ApproachStatusData>(DataDefinition.ApproachStatus);
     }
 
     private void OnRecvOpen(SimConnect sender, SIMCONNECT_RECV_OPEN data)
@@ -382,7 +485,11 @@ internal sealed class SimConnectService : ISimConnectService, IDisposable
         FlightInstruments = 2,
         EngineStatus = 3,
         AutopilotStatus = 4,
-        AircraftInfo = 5
+        AircraftInfo = 5,
+        FlightPlanLeg = 6,
+        FlightPlanWaypoint = 7,
+        NavigationStatus = 8,
+        ApproachStatus = 9
     }
 
     private enum RequestId : uint
