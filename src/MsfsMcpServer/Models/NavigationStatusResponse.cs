@@ -34,6 +34,15 @@ public sealed class NavigationStatusResponse
     [JsonPropertyName("nav2_active_mhz")]
     public double Nav2ActiveFrequencyMHz { get; init; }
 
+    [JsonPropertyName("nav1_dme_nm")]
+    public double Nav1DmeNauticalMiles { get; init; }
+
+    [JsonPropertyName("nav1_to_from")]
+    public double Nav1ToFrom { get; init; }
+
+    [JsonPropertyName("magnetic_variation_deg")]
+    public double MagneticVariationDegrees { get; init; }
+
     [JsonPropertyName("timestamp")]
     public string Timestamp { get; init; } = DateTimeOffset.UtcNow.ToString("O");
 
@@ -55,6 +64,9 @@ public sealed class NavigationStatusResponse
             NavHasGlideSlope = data.NavHasGlideSlope > 0,
             Nav1ActiveFrequencyMHz = Round(data.Nav1ActiveFrequencyMHz, 3),
             Nav2ActiveFrequencyMHz = Round(data.Nav2ActiveFrequencyMHz, 3),
+            Nav1DmeNauticalMiles = Round(data.Nav1DmeNauticalMiles, 1),
+            Nav1ToFrom = Round(data.Nav1ToFrom, 0),
+            MagneticVariationDegrees = Round(data.MagneticVariationDegrees, 1),
             Timestamp = (timestamp ?? DateTimeOffset.UtcNow).ToString("O"),
             Error = null
         };
@@ -74,6 +86,9 @@ public sealed class NavigationStatusResponse
             NavHasGlideSlope = false,
             Nav1ActiveFrequencyMHz = 0,
             Nav2ActiveFrequencyMHz = 0,
+            Nav1DmeNauticalMiles = 0,
+            Nav1ToFrom = 0,
+            MagneticVariationDegrees = 0,
             Timestamp = (timestamp ?? DateTimeOffset.UtcNow).ToString("O"),
             Error = message
         };

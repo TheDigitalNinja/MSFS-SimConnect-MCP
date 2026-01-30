@@ -52,4 +52,19 @@ public struct NavigationStatusData
     /// NAV2 active frequency MHz.
     /// </summary>
     public double Nav2ActiveFrequencyMHz;
+
+    /// <summary>
+    /// NAV1 DME distance, nautical miles.
+    /// </summary>
+    public double Nav1DmeNauticalMiles;
+
+    /// <summary>
+    /// NAV1 to/from indicator (-1 from, 0 off, 1 to).
+    /// </summary>
+    public double Nav1ToFrom;
+
+    /// <summary>
+    /// Magnetic variation, degrees.
+    /// </summary>
+    public double MagneticVariationDegrees;
 }

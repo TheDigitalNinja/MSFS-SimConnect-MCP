@@ -25,7 +25,22 @@ public class EngineStatusToolTests
                 FuelTotalGallons = 85.55,
                 ExhaustGasTemperatureCelsius = 650.4,
                 OilPressurePsi = 48.25,
-                OilTemperatureCelsius = 98.6
+                OilTemperatureCelsius = 98.6,
+                EngineTwoRpm = 2280.1,
+                EngineTwoThrottlePercent = 55.1,
+                EngineOneN1Percent = 92.4,
+                EngineTwoN1Percent = 90.2,
+                EngineOneN2Percent = 88.2,
+                EngineTwoN2Percent = 87.9,
+                EngineOneTorquePercent = 75.2,
+                EngineTwoTorquePercent = 74.8,
+                ExhaustGasTemperatureTwoCelsius = 640.4,
+                FuelFlowTwoGph = 12.1,
+                FuelPressurePsi = 42.2,
+                FuelPressureTwoPsi = 41.9,
+                FuelTotalWeightPounds = 512.4,
+                ApuPercentRpm = 82.2,
+                ApuBleedAir = 1
             });
 
         var callLogger = new Mock<IToolCallLogger>();
@@ -39,9 +54,23 @@ public class EngineStatusToolTests
         result.EngineOneThrottlePercent.Should().Be(57.4);
         result.FuelFlowGallonsPerHour.Should().Be(12.5);
         result.FuelTotalGallons.Should().Be(85.6);
+        result.FuelTotalWeightPounds.Should().Be(512.4);
         result.ExhaustGasTemperatureCelsius.Should().Be(650);
+        result.ExhaustGasTemperatureTwoCelsius.Should().Be(640);
+        result.EngineTwoRpm.Should().Be(2280);
+        result.EngineTwoThrottlePercent.Should().Be(55.1);
+        result.EngineOneN1Percent.Should().Be(92.4);
+        result.EngineTwoN1Percent.Should().Be(90.2);
+        result.EngineOneN2Percent.Should().Be(88.2);
+        result.EngineTwoN2Percent.Should().Be(87.9);
+        result.EngineOneTorquePercent.Should().Be(75.2);
+        result.EngineTwoTorquePercent.Should().Be(74.8);
         result.OilPressurePsi.Should().Be(48.3);
+        result.FuelPressurePsi.Should().Be(42.2);
+        result.FuelPressureTwoPsi.Should().Be(41.9);
         result.OilTemperatureCelsius.Should().Be(99);
+        result.ApuPercentRpm.Should().Be(82);
+        result.ApuBleedAir.Should().BeTrue();
         DateTimeOffset.Parse(result.Timestamp).Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(2));
         callLogger.Verify(l => l.LogSuccess("get_engine_status", It.IsAny<TimeSpan>()), Times.Once);
     }

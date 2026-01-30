@@ -26,7 +26,10 @@ public class NavigationStatusToolTests
                 NavHasLocalizer = 1,
                 NavHasGlideSlope = 0,
                 Nav1ActiveFrequencyMHz = 110.3,
-                Nav2ActiveFrequencyMHz = 111.55
+                Nav2ActiveFrequencyMHz = 111.55,
+                Nav1DmeNauticalMiles = 12.34,
+                Nav1ToFrom = 1,
+                MagneticVariationDegrees = -7.5
             });
 
         var callLogger = new Mock<IToolCallLogger>();
@@ -44,6 +47,9 @@ public class NavigationStatusToolTests
         result.NavHasGlideSlope.Should().BeFalse();
         result.Nav1ActiveFrequencyMHz.Should().Be(110.3);
         result.Nav2ActiveFrequencyMHz.Should().Be(111.55);
+        result.Nav1DmeNauticalMiles.Should().Be(12.3);
+        result.Nav1ToFrom.Should().Be(1);
+        result.MagneticVariationDegrees.Should().Be(-7.5);
         callLogger.Verify(l => l.LogSuccess("get_navigation_status", It.IsAny<TimeSpan>()), Times.Once);
     }
 

@@ -40,6 +40,48 @@ public sealed class AutopilotStatusResponse
     [JsonPropertyName("approach_mode")]
     public bool ApproachMode { get; init; }
 
+    [JsonPropertyName("approach_armed")]
+    public bool ApproachArmed { get; init; }
+
+    [JsonPropertyName("glideslope_mode")]
+    public bool GlideSlopeMode { get; init; }
+
+    [JsonPropertyName("backcourse_mode")]
+    public bool BackcourseMode { get; init; }
+
+    [JsonPropertyName("flight_director")]
+    public bool FlightDirector { get; init; }
+
+    [JsonPropertyName("yaw_damper")]
+    public bool YawDamper { get; init; }
+
+    [JsonPropertyName("bank_hold_mode")]
+    public bool BankHoldMode { get; init; }
+
+    [JsonPropertyName("bank_hold_deg")]
+    public double BankHoldDegrees { get; init; }
+
+    [JsonPropertyName("pitch_hold_mode")]
+    public bool PitchHoldMode { get; init; }
+
+    [JsonPropertyName("pitch_hold_deg")]
+    public double PitchHoldDegrees { get; init; }
+
+    [JsonPropertyName("altitude_arm")]
+    public bool AltitudeArm { get; init; }
+
+    [JsonPropertyName("vnav_armed")]
+    public bool VnavArmed { get; init; }
+
+    [JsonPropertyName("vnav_active")]
+    public bool VnavActive { get; init; }
+
+    [JsonPropertyName("autothrottle_armed")]
+    public bool AutothrottleArmed { get; init; }
+
+    [JsonPropertyName("autothrottle_active")]
+    public bool AutothrottleActive { get; init; }
+
     [JsonPropertyName("timestamp")]
     public string Timestamp { get; init; } = DateTimeOffset.UtcNow.ToString("O");
 
@@ -63,6 +105,20 @@ public sealed class AutopilotStatusResponse
             VerticalSpeedFpm = Round(data.VerticalHoldFpm, 0),
             NavMode = ToBool(data.NavLock),
             ApproachMode = ToBool(data.ApproachHold),
+            ApproachArmed = ToBool(data.ApproachArmed),
+            GlideSlopeMode = ToBool(data.GlideSlopeHold),
+            BackcourseMode = ToBool(data.BackcourseHold),
+            FlightDirector = ToBool(data.FlightDirectorActive),
+            YawDamper = ToBool(data.YawDampener),
+            BankHoldMode = ToBool(data.BankHold),
+            BankHoldDegrees = Round(data.BankHoldDegrees, 0),
+            PitchHoldMode = ToBool(data.PitchHold),
+            PitchHoldDegrees = Round(data.PitchHoldDegrees, 0),
+            AltitudeArm = ToBool(data.AltitudeArmed),
+            VnavArmed = ToBool(data.VnavArmed),
+            VnavActive = ToBool(data.VnavActive),
+            AutothrottleArmed = ToBool(data.AutothrottleArmed),
+            AutothrottleActive = ToBool(data.AutothrottleActive),
             Timestamp = (timestamp ?? DateTimeOffset.UtcNow).ToString("O"),
             Error = null
         };
@@ -84,6 +140,20 @@ public sealed class AutopilotStatusResponse
             VerticalSpeedFpm = 0,
             NavMode = false,
             ApproachMode = false,
+            ApproachArmed = false,
+            GlideSlopeMode = false,
+            BackcourseMode = false,
+            FlightDirector = false,
+            YawDamper = false,
+            BankHoldMode = false,
+            BankHoldDegrees = 0,
+            PitchHoldMode = false,
+            PitchHoldDegrees = 0,
+            AltitudeArm = false,
+            VnavArmed = false,
+            VnavActive = false,
+            AutothrottleArmed = false,
+            AutothrottleActive = false,
             Timestamp = (timestamp ?? DateTimeOffset.UtcNow).ToString("O"),
             Error = message
         };

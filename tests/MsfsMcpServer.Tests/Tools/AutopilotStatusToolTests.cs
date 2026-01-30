@@ -28,7 +28,21 @@ public class AutopilotStatusToolTests
                 VerticalHold = 1,
                 VerticalHoldFpm = 800.4,
                 NavLock = 1,
-                ApproachHold = 0
+                ApproachHold = 0,
+                FlightDirectorActive = 1,
+                ApproachArmed = 1,
+                GlideSlopeHold = 1,
+                BackcourseHold = 0,
+                YawDampener = 1,
+                BankHold = 1,
+                BankHoldDegrees = 20.4,
+                PitchHold = 0,
+                PitchHoldDegrees = 0,
+                AltitudeArmed = 1,
+                VnavArmed = 1,
+                VnavActive = 0,
+                AutothrottleArmed = 1,
+                AutothrottleActive = 0
             });
 
         var callLogger = new Mock<IToolCallLogger>();
@@ -48,6 +62,19 @@ public class AutopilotStatusToolTests
         result.VerticalSpeedFpm.Should().Be(800);
         result.NavMode.Should().BeTrue();
         result.ApproachMode.Should().BeFalse();
+        result.ApproachArmed.Should().BeTrue();
+        result.GlideSlopeMode.Should().BeTrue();
+        result.BackcourseMode.Should().BeFalse();
+        result.FlightDirector.Should().BeTrue();
+        result.YawDamper.Should().BeTrue();
+        result.BankHoldMode.Should().BeTrue();
+        result.BankHoldDegrees.Should().Be(20);
+        result.PitchHoldMode.Should().BeFalse();
+        result.AltitudeArm.Should().BeTrue();
+        result.VnavArmed.Should().BeTrue();
+        result.VnavActive.Should().BeFalse();
+        result.AutothrottleArmed.Should().BeTrue();
+        result.AutothrottleActive.Should().BeFalse();
         DateTimeOffset.Parse(result.Timestamp).Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(2));
         callLogger.Verify(l => l.LogSuccess("get_autopilot_status", It.IsAny<TimeSpan>()), Times.Once);
     }

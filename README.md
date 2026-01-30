@@ -13,15 +13,16 @@ This Windows application sits in your system tray and connects to a running inst
 | Tool | Description |
 |------|-------------|
 | `get_connection_status` | Check if MSFS is running and connected |
-| `get_flight_position` | Latitude, longitude, altitude, heading, ground speed, vertical speed |
+| `get_flight_position` | Position + magnetic heading, GS/VS, pitch/bank, AGL/radio alt, winds, AoA, slip, on-ground |
 | `get_flight_instruments` | Indicated altitude, airspeed (IAS/TAS/Mach), heading indicator, altimeter setting |
-| `get_engine_status` | RPM, throttle position, fuel flow, fuel quantity, temperatures |
-| `get_autopilot_status` | AP master, heading/altitude/speed modes and targets |
+| `get_engine_status` | RPM/throttle, fuel flow/quantity/weight, temps, N1/N2/torque, fuel pressure, APU |
+| `get_autopilot_status` | AP/FD, HDG/ALT/VS/IAS modes, APP/GS/BC, VNAV arm/active, bank/pitch hold, yaw damper, autothrottle |
 | `get_aircraft_info` | Aircraft type, tail number, weights |
 | `get_flight_plan_leg` | Active GPS plan state, next waypoint bearing/distance/ETE/ETA, XTK, destination ETE/ETA |
 | `get_flight_plan_waypoint` | Active leg next/previous waypoint details (ID/lat/lon/alt, bearing, distance) |
-| `get_navigation_status` | Nav source (GPS/VLOC), OBS/course, CDI/GSI, LOC/GS availability, NAV1/2 freqs |
+| `get_navigation_status` | Nav source (GPS/VLOC), OBS/course, CDI/GSI, LOC/GS availability, NAV1/2 freqs, DME, to/from, magvar |
 | `get_approach_status` | Approach loaded/active, segment flags, glidepath/GS deviation |
+| `get_aircraft_configuration` | Gear, flaps, spoilers, autobrake, parking brake, trims, exterior lights |
 
 All tools are **read-only**. This server cannot control your aircraft.
 

@@ -4,6 +4,8 @@
 
 A Windows system tray app that connects to Microsoft Flight Simulator 2024 via SimConnect and exposes flight data through MCP (Model Context Protocol). AI agents can query real-time flight info for flight instruction use cases. **Read-only** - no aircraft control.
 
+**New coverage:** magnetic heading, winds/temps/AoA/slip/AGL, richer AP/FMA (FD, APP/GS/BC, VNAV, bank/pitch hold, yaw damper, autothrottle), nav DME/to-from/magvar, expanded engine (N1/N2/torque/fuel pressure/APU), and a new aircraft configuration tool (gear/flaps/spoilers/brakes/trim/lights).
+
 ## Tech Stack
 
 - **.NET 8.0** (net8.0-windows)

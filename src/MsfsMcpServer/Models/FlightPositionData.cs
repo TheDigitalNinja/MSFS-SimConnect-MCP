@@ -47,4 +47,49 @@ public struct FlightPositionData
     /// Bank attitude, degrees.
     /// </summary>
     public double BankDegrees;
+
+    /// <summary>
+    /// Magnetic heading, degrees.
+    /// </summary>
+    public double HeadingMagnetic;
+
+    /// <summary>
+    /// Radio altitude above terrain, feet.
+    /// </summary>
+    public double RadioAltitudeFeet;
+
+    /// <summary>
+    /// Height above ground level, feet.
+    /// </summary>
+    public double HeightAboveGroundFeet;
+
+    /// <summary>
+    /// Ambient wind speed, knots.
+    /// </summary>
+    public double WindSpeedKnots;
+
+    /// <summary>
+    /// Ambient wind direction, degrees true.
+    /// </summary>
+    public double WindDirectionDegrees;
+
+    /// <summary>
+    /// Total air temperature, Celsius.
+    /// </summary>
+    public double TotalAirTemperatureCelsius;
+
+    /// <summary>
+    /// Angle of attack, radians.
+    /// </summary>
+    public double AngleOfAttackRadians;
+
+    /// <summary>
+    /// Slip/skid ball deflection.
+    /// </summary>
+    public double SlipSkidBall;
+
+    /// <summary>
+    /// Indicates if the aircraft is on the ground.
+    /// </summary>
+    public int OnGround;
 }
