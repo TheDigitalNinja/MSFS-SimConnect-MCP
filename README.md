@@ -68,6 +68,14 @@ The server runs on `http://localhost:5000` with SSE transport. Use the SSE endpo
 3. Connect your MCP client to `http://localhost:5000/mcp/sse`.
 4. Call `get_connection_status` and `get_flight_position`.
 
+### Local Testing with MCP Inspector
+
+With the server running, you can explore tools via the MCP Inspector:
+
+```
+npx @modelcontextprotocol/inspector http://localhost:5000/mcp
+```
+
 ## Usage
 
 TODO
