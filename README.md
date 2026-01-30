@@ -18,6 +18,10 @@ This Windows application sits in your system tray and connects to a running inst
 | `get_engine_status` | RPM, throttle position, fuel flow, fuel quantity, temperatures |
 | `get_autopilot_status` | AP master, heading/altitude/speed modes and targets |
 | `get_aircraft_info` | Aircraft type, tail number, weights |
+| `get_flight_plan_leg` | Active GPS plan state, next waypoint bearing/distance/ETE/ETA, XTK, destination ETE/ETA |
+| `get_flight_plan_waypoint` | Active leg next/previous waypoint details (ID/lat/lon/alt, bearing, distance) |
+| `get_navigation_status` | Nav source (GPS/VLOC), OBS/course, CDI/GSI, LOC/GS availability, NAV1/2 freqs |
+| `get_approach_status` | Approach loaded/active, segment flags, glidepath/GS deviation |
 
 All tools are **read-only**. This server cannot control your aircraft.
 
