@@ -33,19 +33,24 @@ TODO
 
 ## Configuration
 
-### Claude Desktop (MCP)
+### Claude Desktop (Connector UI)
 
-Add to your Claude Desktop config (`%APPDATA%\Claude\claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "msfs": {
-      "url": "http://localhost:5000/mcp/sse"
-    }
-  }
-}
-```
+1. Run the server: `dotnet run --project src/MsfsMcpServer` (listens on `http://localhost:5000`).
+2. Configure Claude with this JSON (e.g., in `claude_desktop_config.json`):
+   ```json
+   {
+     "mcpServers": {
+       "msfs": {
+         "command": "npx",
+         "args": [
+           "mcp-remote",
+           "http://localhost:5000/mcp/sse"
+         ]
+       }
+     }
+   }
+   ```
+3. Keep the server running while you use it.
 
 ### Other MCP Clients
 
