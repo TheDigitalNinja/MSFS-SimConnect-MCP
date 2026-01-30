@@ -29,6 +29,27 @@ public class ConnectionStatusToolTests
     }
 
     [Fact]
+    public async Task GetConnectionStatus_WhenReconnectSucceeds_ReturnsConnectedResponse()
+    {
+        var simConnect = new Mock<ISimConnectService>();
+        simConnect.Setup(s => s.IsConnected).Returns(false);
+        simConnect.Setup(s => s.ConnectAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var callLogger = new Mock<IToolCallLogger>();
+        var tool = new ConnectionStatusTool(simConnect.Object, NullLogger<ConnectionStatusTool>.Instance, callLogger.Object);
+
+        var result = await tool.GetConnectionStatus(CancellationToken.None);
+
+        result.Should().BeEquivalentTo(new ConnectionStatusResponse
+        {
+            Connected = true,
+            Simulator = "Microsoft Flight Simulator 2024",
+            Error = null
+        });
+        callLogger.Verify(l => l.LogSuccess("get_connection_status", It.IsAny<TimeSpan>()), Times.Once);
+        simConnect.Verify(s => s.ConnectAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
     public async Task GetConnectionStatus_WhenDisconnected_ReturnsFriendlyError()
     {
         var simConnect = new Mock<ISimConnectService>();

@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -16,6 +17,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
 {
     private const int TooltipMaxLength = 63;
     private static readonly TimeSpan UpdateInterval = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan ReconnectInterval = TimeSpan.FromSeconds(5);
 
     private readonly ISimConnectService _simConnect;
     private readonly ILogger<TrayApplicationContext> _logger;
@@ -29,6 +31,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     private readonly Icon _connectedIcon;
     private readonly Icon _disconnectedIcon;
 
+    private DateTimeOffset _nextReconnectAttempt = DateTimeOffset.MinValue;
     private bool _disposed;
 
     public TrayApplicationContext(
@@ -111,6 +114,20 @@ internal sealed class TrayApplicationContext : ApplicationContext
         }
 
         var connected = _simConnect.IsConnected;
+
+        if (!connected && DateTimeOffset.UtcNow >= _nextReconnectAttempt)
+        {
+            _nextReconnectAttempt = DateTimeOffset.UtcNow.Add(ReconnectInterval);
+            try
+            {
+                connected = await _simConnect.ConnectAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "SimConnect reconnect attempt failed while refreshing tray status.");
+            }
+        }
+
         _statusMenuItem.Text = connected ? "Connected to MSFS" : "Disconnected (start MSFS)";
         _notifyIcon.Icon = connected ? _connectedIcon : _disconnectedIcon;
 

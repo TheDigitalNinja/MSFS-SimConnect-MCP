@@ -52,9 +52,9 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapMcp(pattern: "/mcp");
 
-app.MapGet("/api/status", (ISimConnectService simConnect) =>
+app.MapGet("/api/status", async (ISimConnectService simConnect, CancellationToken ct) =>
 {
-    if (!simConnect.IsConnected)
+    if (!simConnect.IsConnected && !await simConnect.ConnectAsync(ct).ConfigureAwait(false))
     {
         return Results.Json(ConnectionStatusResponse.Disconnected("SimConnect not available. Is MSFS running?"));
     }
@@ -64,7 +64,7 @@ app.MapGet("/api/status", (ISimConnectService simConnect) =>
 
 app.MapGet("/api/aircraft", async (ISimConnectService simConnect, CancellationToken ct) =>
 {
-    if (!simConnect.IsConnected)
+    if (!simConnect.IsConnected && !await simConnect.ConnectAsync(ct).ConfigureAwait(false))
     {
         return Results.Json(AircraftInfoResponse.ErrorResponse("SimConnect not available. Is MSFS running?"));
     }
@@ -102,7 +102,7 @@ app.MapGet("/api/aircraft", async (ISimConnectService simConnect, CancellationTo
 
 app.MapGet("/api/position", async (ISimConnectService simConnect, CancellationToken ct) =>
 {
-    if (!simConnect.IsConnected)
+    if (!simConnect.IsConnected && !await simConnect.ConnectAsync(ct).ConfigureAwait(false))
     {
         return Results.Json(FlightPositionResponse.ErrorResponse("SimConnect not available. Is MSFS running?"));
     }
@@ -140,7 +140,7 @@ app.MapGet("/api/position", async (ISimConnectService simConnect, CancellationTo
 
 app.MapGet("/api/instruments", async (ISimConnectService simConnect, CancellationToken ct) =>
 {
-    if (!simConnect.IsConnected)
+    if (!simConnect.IsConnected && !await simConnect.ConnectAsync(ct).ConfigureAwait(false))
     {
         return Results.Json(FlightInstrumentsResponse.ErrorResponse("SimConnect not available. Is MSFS running?"));
     }
@@ -178,7 +178,7 @@ app.MapGet("/api/instruments", async (ISimConnectService simConnect, Cancellatio
 
 app.MapGet("/api/autopilot", async (ISimConnectService simConnect, CancellationToken ct) =>
 {
-    if (!simConnect.IsConnected)
+    if (!simConnect.IsConnected && !await simConnect.ConnectAsync(ct).ConfigureAwait(false))
     {
         return Results.Json(AutopilotStatusResponse.ErrorResponse("SimConnect not available. Is MSFS running?"));
     }
@@ -216,7 +216,7 @@ app.MapGet("/api/autopilot", async (ISimConnectService simConnect, CancellationT
 
 app.MapGet("/api/engine", async (ISimConnectService simConnect, CancellationToken ct) =>
 {
-    if (!simConnect.IsConnected)
+    if (!simConnect.IsConnected && !await simConnect.ConnectAsync(ct).ConfigureAwait(false))
     {
         return Results.Json(EngineStatusResponse.ErrorResponse("SimConnect not available. Is MSFS running?"));
     }

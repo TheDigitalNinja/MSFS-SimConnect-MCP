@@ -47,7 +47,13 @@ public sealed class AutopilotStatusTool
                 return response;
             }
 
-            if (!_simConnect.IsConnected)
+            var isConnected = _simConnect.IsConnected;
+            if (!isConnected)
+            {
+                isConnected = await _simConnect.ConnectAsync(ct).ConfigureAwait(false);
+            }
+
+            if (!isConnected)
             {
                 response = AutopilotStatusResponse.ErrorResponse("SimConnect not available. Is MSFS running?");
                 return response;

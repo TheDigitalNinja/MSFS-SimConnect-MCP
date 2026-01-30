@@ -32,7 +32,7 @@ public sealed class ConnectionStatusTool
     /// Returns whether SimConnect is reachable.
     /// </summary>
     [McpServerTool(Name = "get_connection_status"), Description("Checks if SimConnect is connected and responsive.")]
-    public Task<ConnectionStatusResponse> GetConnectionStatus(CancellationToken ct)
+    public async Task<ConnectionStatusResponse> GetConnectionStatus(CancellationToken ct)
     {
         var stopwatch = Stopwatch.StartNew();
 
@@ -41,35 +41,41 @@ public sealed class ConnectionStatusTool
             _logger.LogWarning("Connection status request was canceled before execution.");
             var canceled = ConnectionStatusResponse.Disconnected("Request canceled.");
             _callLogger.LogFailure(ToolName, stopwatch.Elapsed, canceled.Error ?? "Request canceled.");
-            return Task.FromResult(canceled);
+            return canceled;
         }
 
         try
         {
-            if (!_simConnect.IsConnected)
+            var isConnected = _simConnect.IsConnected;
+            if (!isConnected)
+            {
+                isConnected = await _simConnect.ConnectAsync(ct).ConfigureAwait(false);
+            }
+
+            if (!isConnected)
             {
                 var disconnected = ConnectionStatusResponse.Disconnected("SimConnect not available. Is MSFS running?");
                 _callLogger.LogFailure(ToolName, stopwatch.Elapsed, disconnected.Error ?? "SimConnect not available.");
-                return Task.FromResult(disconnected);
+                return disconnected;
             }
 
             var connected = ConnectionStatusResponse.ConnectedStatus("Microsoft Flight Simulator 2024");
             _callLogger.LogSuccess(ToolName, stopwatch.Elapsed);
-            return Task.FromResult(connected);
+            return connected;
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
             _logger.LogWarning("Connection status request canceled.");
             var canceled = ConnectionStatusResponse.Disconnected("Request canceled.");
             _callLogger.LogFailure(ToolName, stopwatch.Elapsed, canceled.Error ?? "Request canceled.");
-            return Task.FromResult(canceled);
+            return canceled;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting connection status.");
             var failure = ConnectionStatusResponse.Disconnected("An unexpected error occurred.");
             _callLogger.LogFailure(ToolName, stopwatch.Elapsed, failure.Error ?? "An unexpected error occurred.");
-            return Task.FromResult(failure);
+            return failure;
         }
     }
 }
