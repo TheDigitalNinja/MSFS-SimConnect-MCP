@@ -106,7 +106,7 @@ This project is released under the [Unlicense](LICENSE) - public domain.
 
 ## Contributing
 
-Instead of pull requests, please send a prompt describing what you want the tools or server to do, which SimVars/behaviors matter, and the expected outputs. I’ll run the prompt myself so changes reflect real usage intent.
+Instead of pull requests, please send a prompt request describing what you want the tools or server to do, which SimVars/behaviors matter, and the expected outputs. I’ll run the prompt myself so changes reflect real usage intent.
 
 ## Links
 
